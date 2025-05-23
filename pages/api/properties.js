@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       photo_size: 'Large'    // Get larger photos
     });
 
-    const apiUrl = `https://api.trademe.co.nz/v1/Search/Property/Residential.json?${params}`;
+    const apiUrl = `https://api.tmsandbox.co.nz/v1/Search/Property/Residential.json?${params}`;
     
     // Build OAuth 1.0a authorization header
     const authHeader = buildOAuthHeader({
@@ -137,9 +137,9 @@ function buildOAuthHeader({ method, url, consumerKey, consumerSecret, accessToke
     oauthParams.oauth_token = accessToken;
   }
 
-  // For basic consumer key authentication without full OAuth, return simple header
-  if (!accessToken) {
-    return `OAuth oauth_consumer_key="${consumerKey}", oauth_signature_method="PLAINTEXT", oauth_signature="${consumerSecret}&"`;
+  // For sandbox/basic authentication, use simple OAuth consumer key method
+  if (!TRADEME_ACCESS_TOKEN) {
+    return `OAuth oauth_consumer_key="${consumerKey}", oauth_signature_method="PLAINTEXT", oauth_signature="${encodeURIComponent(consumerSecret)}&"`;
   }
 
   // Build the signature base string and sign it (simplified version)
