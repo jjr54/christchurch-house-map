@@ -43,31 +43,43 @@ export default function HousePriceMap() {
   const [isDragging, setIsDragging] = useState(false)
 
   // Generate mock data on component mount
-  useEffect(() => {
-    // In a real implementation, this would fetch data from homes.co.nz API
-    // For now, we'll use mock data
+   useEffect(() => {
+    // Fetch data from Trade Me API
     const fetchData = async () => {
       try {
-        // Import the mock data generator only on the client side
-        const { generateMockHouseData } = await import("@/lib/mock-data")
+        const response = await fetch('/api/trademe')
+        const trademeData = await response.json()
 
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 800))
-        const data = generateMockHouseData(
-          { latitude: CHRISTCHURCH_CENTER.lat, longitude: CHRISTCHURCH_CENTER.lng },
-          500,
-        )
-        setHouseData(data)
+        // Transform trademeData into GeoJSON FeatureCollection format expected by the map
+        const features = (trademeData.List || []).map((item: any, i: number) => ({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: [item.Longitude, item.Latitude],
+          },
+          properties: {
+            id: item.ListingId || i,
+            price: item.PriceDisplay ? parseInt(item.PriceDisplay.replace(/[^0-9]/g, "")) : 0,
+            bedrooms: item.Bedrooms,
+            bathrooms: item.Bathrooms,
+            address: item.Address,
+            // add more fields as needed
+          },
+        }))
+
+        setHouseData({
+          type: "FeatureCollection",
+          features,
+        })
         setLoading(false)
       } catch (error) {
-        console.error("Error fetching house data:", error)
+        console.error("Error fetching house data from Trade Me API:", error)
         setLoading(false)
       }
     }
 
     fetchData()
   }, [])
-
   // Handle radius change from slider
   const handleRadiusChange = (value: number[]) => {
     setRadius(value[0])
