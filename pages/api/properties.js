@@ -89,7 +89,17 @@ export default async function handler(req, res) {
 // Transform TradeMe API data to match your app's format
 function transformTradeWeData(properties) {
   return properties
-    .filter(property => property.GeographicLocation) // Only properties with coordinates
+    .filter(property => {
+      // More thorough coordinate validation
+      const geo = property.GeographicLocation;
+      return geo && 
+             typeof geo.Latitude === 'number' && 
+             typeof geo.Longitude === 'number' &&
+             !isNaN(geo.Latitude) && 
+             !isNaN(geo.Longitude) &&
+             geo.Latitude !== 0 && 
+             geo.Longitude !== 0;
+    })
     .map(property => ({
       id: property.ListingId,
       title: property.Title,
@@ -109,8 +119,8 @@ function transformTradeWeData(properties) {
       photos: property.Photos ? property.Photos.map(photo => photo.Value.Large) : [],
       mainPhoto: property.PictureHref || property.Photos?.[0]?.Value?.Large,
       coordinates: {
-        lat: property.GeographicLocation.Latitude,
-        lng: property.GeographicLocation.Longitude
+        lat: parseFloat(property.GeographicLocation.Latitude),
+        lng: parseFloat(property.GeographicLocation.Longitude)
       },
       tradeMeUrl: `https://www.trademe.co.nz/property/residential-property-for-sale/${property.ListingId}`,
       dateListted: property.StartDate,
