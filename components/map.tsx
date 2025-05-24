@@ -249,4 +249,5 @@ function MedianPriceCalculator({
   }, [center, radius, houseData, setMedianPrice])
 
   return null
+  console.log('Properties received:', properties?.map(p => p.coordinates));
 }
