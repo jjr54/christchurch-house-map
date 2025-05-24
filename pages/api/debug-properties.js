@@ -2,10 +2,9 @@
 // Debug endpoint to see raw TradeMe API response
 
 export default async function handler(req, res) {
-  const { 
-    TRADEME_CONSUMER_KEY, 
-    TRADEME_CONSUMER_SECRET 
-  } = process.env;
+  const consumerKey = process.env.TRADEME_CONSUMER_KEY;
+const consumerSecret = process.env.TRADEME_CONSUMER_SECRET;
+  }
 
   if (!TRADEME_CONSUMER_KEY || !TRADEME_CONSUMER_SECRET) {
     return res.status(500).json({ 
